@@ -310,7 +310,7 @@
 	pinctrl-0 = <&cp0_spi0_pins>;
 	reg = <0x700680 0x50>;
 
-	spi-flash@0 {
+	flash@0 {
 		#address-cells = <0x1>;
 		#size-cells = <0x1>;
 		compatible = "jedec,spi-nor";
@@ -404,7 +404,7 @@
 &cp0_usb3_1 {
 	status = "okay";
 	usb-phy = <&cp0_usb3_0_phy1>;
-	phys =  <&cp0_utmi1>;
+	phys = <&cp0_utmi1>;
 	phy-names = "utmi";
 	dr_mode = "host";
 };

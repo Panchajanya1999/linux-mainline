@@ -137,11 +137,9 @@ static u32 cpu_power_to_freq(struct cpufreq_cooling_device *cpufreq_cdev,
 static u32 get_load(struct cpufreq_cooling_device *cpufreq_cdev, int cpu,
 		    int cpu_idx)
 {
-	unsigned long max = arch_scale_cpu_capacity(cpu);
-	unsigned long util;
+	unsigned long util = sched_cpu_util(cpu);
 
-	util = sched_cpu_util(cpu, max);
-	return (util * 100) / max;
+	return (util * 100) / arch_scale_cpu_capacity(cpu);
 }
 #else /* !CONFIG_SMP */
 static u32 get_load(struct cpufreq_cooling_device *cpufreq_cdev, int cpu,
@@ -328,7 +326,7 @@ static inline bool em_is_sane(struct cpufreq_cooling_device *cpufreq_cdev,
 	struct cpufreq_policy *policy;
 	unsigned int nr_levels;
 
-	if (!em)
+	if (!em || em_is_artificial(em))
 		return false;
 
 	policy = cpufreq_cdev->policy;

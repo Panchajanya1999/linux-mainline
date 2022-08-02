@@ -121,10 +121,12 @@ enum lockdown_reason {
 	LOCKDOWN_DEBUGFS,
 	LOCKDOWN_XMON_WR,
 	LOCKDOWN_BPF_WRITE_USER,
+	LOCKDOWN_DBG_WRITE_KERNEL,
 	LOCKDOWN_INTEGRITY_MAX,
 	LOCKDOWN_KCORE,
 	LOCKDOWN_KPROBES,
 	LOCKDOWN_BPF_READ_KERNEL,
+	LOCKDOWN_DBG_READ_KERNEL,
 	LOCKDOWN_PERF,
 	LOCKDOWN_TRACEFS,
 	LOCKDOWN_XMON_RW,
@@ -351,7 +353,8 @@ int security_inode_readlink(struct dentry *dentry);
 int security_inode_follow_link(struct dentry *dentry, struct inode *inode,
 			       bool rcu);
 int security_inode_permission(struct inode *inode, int mask);
-int security_inode_setattr(struct dentry *dentry, struct iattr *attr);
+int security_inode_setattr(struct user_namespace *mnt_userns,
+			   struct dentry *dentry, struct iattr *attr);
 int security_inode_getattr(const struct path *path);
 int security_inode_setxattr(struct user_namespace *mnt_userns,
 			    struct dentry *dentry, const char *name,
@@ -846,8 +849,9 @@ static inline int security_inode_permission(struct inode *inode, int mask)
 	return 0;
 }
 
-static inline int security_inode_setattr(struct dentry *dentry,
-					  struct iattr *attr)
+static inline int security_inode_setattr(struct user_namespace *mnt_userns,
+					 struct dentry *dentry,
+					 struct iattr *attr)
 {
 	return 0;
 }
@@ -1422,6 +1426,8 @@ int security_sctp_bind_connect(struct sock *sk, int optname,
 			       struct sockaddr *address, int addrlen);
 void security_sctp_sk_clone(struct sctp_association *asoc, struct sock *sk,
 			    struct sock *newsk);
+int security_sctp_assoc_established(struct sctp_association *asoc,
+				    struct sk_buff *skb);
 
 #else	/* CONFIG_SECURITY_NETWORK */
 static inline int security_unix_stream_connect(struct sock *sock,
@@ -1640,6 +1646,12 @@ static inline void security_sctp_sk_clone(struct sctp_association *asoc,
 					  struct sock *sk,
 					  struct sock *newsk)
 {
+}
+
+static inline int security_sctp_assoc_established(struct sctp_association *asoc,
+						  struct sk_buff *skb)
+{
+	return 0;
 }
 #endif	/* CONFIG_SECURITY_NETWORK */
 
