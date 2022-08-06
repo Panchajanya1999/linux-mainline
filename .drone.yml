@@ -1,0 +1,24 @@
+--- 
+clone: 
+  depth: 1
+kind: pipeline
+name: AzurePipeline
+steps: 
+  - 
+    commands: 
+      - "curl https://gist.githubusercontent.com/Panchajanya1999/35c451a87798dc28eecdaf8aa823c9ab/raw/a225ec0a4e2cd022bf286aacf1c18b0ae90d2ea2/PKGBUILD > PKGBUILD"
+      - "BOT_MSG_URL=\"https://api.telegram.org/bot$token/sendMessage\""
+      - "BOT_BUILD_URL=\"https://api.telegram.org/bot$token/sendDocument\""
+      - "tg_post_msg() { curl -s -X POST \"$BOT_MSG_URL\" -d chat_id=\"$CHATID\" -d \"disable_web_page_preview=true\" -d \"parse_mode=html\" -d text=\"$1\"}"
+      - "tg_post_build() { MD5CHECK=$(md5sum $1 | cut -d' ' -f1) curl --progress-bar -F document=@\"$1\" \"$BOT_BUILD_URL\" -F chat_id=\"$CHATID\" -F \"disable_web_page_preview=true\" -F \"parse_mode=Markdown\" -F caption=\"$2 | *MD5 Checksum : *\\`$MD5CHECK\\`\" }"
+      - "makepkg -s"
+      - "builds=(\"linux-azure-*\" \"linux-azure-headers-*\")"
+      - "for _b in \\\"${builds[@]}\\\"; do tg_post_build \\\"$_b\\\" done"
+    environment: 
+      TOKEN: 
+        from_secret: "token CHATID"
+    image: "panchajanya1999/archlinux:latest"
+    name: Azure-Images
+    trigger: 
+      branch: 
+        - master
